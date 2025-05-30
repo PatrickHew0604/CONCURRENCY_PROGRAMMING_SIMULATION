@@ -4,6 +4,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -206,6 +207,7 @@ public class GoGoCoffeeCafe {
             baristaSemaphore.acquire();
             customer = (Customer) ((LinkedList<?>) customerOrderingQueue).poll();
             System.out.println(barista + " : Serving customer " + customer);
+            Objects.requireNonNull(customer).gettingServed = new AtomicBoolean(true);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         } finally {
@@ -213,6 +215,7 @@ public class GoGoCoffeeCafe {
         }
         prepareOrder(barista, customer);
         baristaSemaphore.release();
+        customerInCafeCount.incrementAndGet();
         Objects.requireNonNull(customer).controller.release();
     }
 
@@ -248,6 +251,7 @@ public class GoGoCoffeeCafe {
             System.out.println(barista + " : Using Espresso Machine and Milk Frothing Machine to make Cappuccino for " + customer);
             try {
                 TimeUnit.SECONDS.sleep(new Random().nextInt(3, 5));
+//                TimeUnit.SECONDS.sleep(new Random().nextInt(10));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -267,6 +271,7 @@ public class GoGoCoffeeCafe {
             System.out.println(barista + " : Using Espresso Machine to make Espresso for " + customer);
             try {
                 TimeUnit.SECONDS.sleep(new Random().nextInt(2, 4));
+//                TimeUnit.SECONDS.sleep(new Random().nextInt(10));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -285,6 +290,7 @@ public class GoGoCoffeeCafe {
             System.out.println(barista + " : Using Juice Tap to make Juice for " + customer);
             try {
                 TimeUnit.SECONDS.sleep(new Random().nextInt(1, 3));
+//                TimeUnit.SECONDS.sleep(new Random().nextInt(10));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -314,7 +320,7 @@ public class GoGoCoffeeCafe {
                 customerOrderingQueue.add(customer);
                 System.out.println(customer + " : Stands in the line at " + customerOrderingQueue.size() +
                         " position and order " + customer.orderDrinks);
-                customerInCafeCount.incrementAndGet();
+
             }
 
             if (!customerOrderingQueue.isEmpty()) {

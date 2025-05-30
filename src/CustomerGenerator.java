@@ -1,8 +1,10 @@
+import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 public class CustomerGenerator extends Thread {
     GoGoCoffeeCafe goGoCoffeeCafe;
+    ArrayList<Thread> customerThreads = new ArrayList<>();
 
     public CustomerGenerator(GoGoCoffeeCafe goGoCoffeeCafe) {
         this.goGoCoffeeCafe = goGoCoffeeCafe;
@@ -13,10 +15,11 @@ public class CustomerGenerator extends Thread {
         for (int i = 0; i < 20; i++) {
             Thread customerThread = new Customer(goGoCoffeeCafe);
             customerThread.start();
+            customerThreads.add(customerThread);
             customerThread.setName("Customer " + (i + 1));
             try {
                 TimeUnit.SECONDS.sleep(new Random().nextInt(3, 5));
-//                TimeUnit.SECONDS.sleep(2);
+//                TimeUnit.SECONDS.sleep(1);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -24,7 +27,6 @@ public class CustomerGenerator extends Thread {
         goGoCoffeeCafe.isCafeClose = true;
         System.out.println("================ Put on Cafe Closing Sign ================");
         if (goGoCoffeeCafe.customerOrderingQueue.isEmpty()) {
-            // Dunno why cannot wake them up
             try {
                 TimeUnit.SECONDS.sleep(1);
                 if (goGoCoffeeCafe.baristaSemaphore.availablePermits() == 3) {

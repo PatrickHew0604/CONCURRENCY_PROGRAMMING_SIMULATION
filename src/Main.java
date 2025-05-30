@@ -30,6 +30,9 @@ public class Main {
             for (Barista barista : baristaList) {
                 barista.join();
             }
+            for (Thread customer : customerGenerator.customerThreads) {
+                customer.join();
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

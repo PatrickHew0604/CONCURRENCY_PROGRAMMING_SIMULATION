@@ -55,6 +55,19 @@ public class Customer extends Thread {
         try {
             boolean isLeave = goGoCoffeeCafe.placeOrder(this);
             if (isLeave) return;
+            long now = System.currentTimeMillis();
+            while (!gettingServed.get()) {
+                if (System.currentTimeMillis() - now > new Random().nextLong(2000,6000)) {
+                    System.out.println(this + " : Getting tired standing and leave the cafe");
+                    goGoCoffeeCafe.orderingQueueLock.lock();
+                    try {
+                        goGoCoffeeCafe.customerOrderingQueue.remove(this);
+                    } finally {
+                        goGoCoffeeCafe.orderingQueueLock.unlock();
+                    }
+                    return;
+                }
+            }
             controller.acquire();
             payForDrinks();
             goGoCoffeeCafe.seekForAvailableSeat(this);
